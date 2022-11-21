@@ -1,6 +1,5 @@
 package ch.javacamp.botdetector;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +10,7 @@ import static org.assertj.core.api.Assertions.*;
 
 public class BotsTest {
 
-    private String googleLine = "66.249.79.195 |#|\"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\"";
-    private String fakeGoogleBot = "118.193.69.162 |#|\"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\"";
+    private final String googleLine = "66.249.79.195 |#|\"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\"";
 
     @Test
     @DisplayName("Detect GoogletBot as bot without identification and verification.")
@@ -40,6 +38,7 @@ public class BotsTest {
     @Test
     @DisplayName("Detect Fake GoogletBot with identification and with failed verification.")
     public void t4() {
+        String fakeGoogleBot = "118.193.69.162 |#|\"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\"";
         Optional<BotDescription> actual = Bots.detector().detect(TestUtils.parse(fakeGoogleBot)).identifyVerified();
         assertThat(actual).hasValueSatisfying(x -> assertThat(x.verification()).isEqualTo(Verification.DECEIVED));
         assertThat(actual).hasValueSatisfying(x -> assertThat(x.name()).isEqualTo("googlebot"));

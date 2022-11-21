@@ -1,0 +1,5 @@
+.*bot.*
+.*spider.*
+.*crawl.*
+.*yahoo.*
+.*http.*

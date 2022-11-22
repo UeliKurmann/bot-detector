@@ -1,29 +1,25 @@
 package ch.javacamp.botdetector.impl;
 
+import ch.javacamp.botdetector.impl.utils.Cache;
+
 import java.net.InetAddress;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class IPResolver {
 
-    private final ConcurrentMap<String, Optional<String>> cache = new ConcurrentHashMap<>();
-    private final int cacheSize;
+    private final Cache<String, Optional<String>> cache;
 
     public IPResolver() {
         this(2000);
     }
 
     public IPResolver(final int cacheSize) {
-        this.cacheSize = cacheSize;
+        this.cache = Cache.create(cacheSize);
     }
 
     public Optional<String> getDomainName(final String ipAddress) {
-        if (cache.size() > cacheSize) {
-            cache.clear();
-        }
-        return cache.computeIfAbsent(ipAddress, this::getByIp);
+        return cache.getOrPut(ipAddress, () -> getByIp(ipAddress));
     }
 
     private Optional<String> getByIp(final String ip) {

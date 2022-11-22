@@ -9,8 +9,9 @@ public class HashsTest {
     @Test
     @DisplayName("Happy Flow")
     public void t1() {
-        final String actual = Hashs.md5("happy-flow");
-        Assertions.assertThat(actual).isEqualTo("4CA777718EDB8EF16EDB936FB3D4CD92");
+        final byte[] actual = Hashs.md5("happy-flow");
+        final byte[] expected = new byte[]{76, -89, 119, 113, -114, -37, -114, -15, 110, -37, -109, 111, -77, -44, -51, -110};
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 }

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static ch.javacamp.botdetector.BotDescription.*;
-import static org.assertj.core.api.Assertions.*;
+import static ch.javacamp.botdetector.BotDescription.Verification;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BotsTest {
 

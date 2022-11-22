@@ -1,6 +1,9 @@
 package ch.javacamp.botdetector.impl;
 
-import ch.javacamp.botdetector.*;
+import ch.javacamp.botdetector.BotDescription;
+import ch.javacamp.botdetector.Bots;
+import ch.javacamp.botdetector.RequestDescriptor;
+import ch.javacamp.botdetector.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

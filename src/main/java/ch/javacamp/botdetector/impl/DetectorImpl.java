@@ -3,13 +3,13 @@ package ch.javacamp.botdetector.impl;
 import ch.javacamp.botdetector.Assessment;
 import ch.javacamp.botdetector.Detector;
 import ch.javacamp.botdetector.RequestDescriptor;
+import ch.javacamp.botdetector.impl.utils.Cache;
 import ch.javacamp.botdetector.impl.utils.Hashs;
 import ch.javacamp.botdetector.impl.utils.IOUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class DetectorImpl implements Detector {
@@ -17,6 +17,8 @@ public class DetectorImpl implements Detector {
     private static final int MAX_SIZE = 10000;
     private static final String CONTAINS_PATTERN = ".*";
     private final List<Pattern> botPatterns = new ArrayList<>();
+
+    private final Cache<String, Optional<String>> cache = Cache.create(10_000);
 
     public DetectorImpl() {
         IOUtils.lines("bots.txt")//
@@ -28,16 +30,20 @@ public class DetectorImpl implements Detector {
 
     @Override
     public Assessment detect(RequestDescriptor descriptor) {
-        return checkUaString(descriptor);
+        Optional<String> elem = cache.getOrPut(new String(Hashs.md5(descriptor.userAgent())), () -> checkUaString(descriptor));
+        return elem.map(x -> Assessment.create(Assessment.Classification.BOT, x, descriptor))
+                .orElse(Assessment.NO_BOT);
+
+
     }
 
-    private Assessment checkUaString(RequestDescriptor descriptor) {
+    private Optional<String> checkUaString(RequestDescriptor descriptor) {
         for (final Pattern pattern : botPatterns) {
             if (pattern.matcher(descriptor.userAgent()).matches()) {
-                return Assessment.create(Assessment.Classification.BOT, pattern.pattern(), descriptor);
+                return Optional.of(pattern.pattern());
             }
         }
-        return Assessment.NO_BOT;
+        return Optional.empty();
     }
 
 }

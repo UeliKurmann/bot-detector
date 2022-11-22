@@ -4,7 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ch.javacamp.bot-detector</groupId>
     <artifactId>bot-detector</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+    <url>https://github.com/UeliKurmann/bot-detector</url>
+    <inceptionYear>2022</inceptionYear>
+    <organization>
+        <name>Javacamp.ch</name>
+        <url>https://github.com/UeliKurmann/bot-detector</url>
+    </organization>
+
+    <name>Bot Detector</name>
+    <description>A small, fast and dependency less Java library to detect and verify bots and crawlers on the basis of user-agents and IP addresses. The authenticity of a bot can be verified with reverse dns lookups.</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -13,7 +22,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <license.licenseName>mit</license.licenseName>
     </properties>
+
+    <licenses>
+        <license>
+            <name>mit</name>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
@@ -56,13 +72,60 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>github</id>
-            <name>GitHub UeliKurmann Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/UeliKurmann/bot-detector</url>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <scm>
+        <url>https://github.com/UeliKurmann/bot-detector.git</url>
+    </scm>
 </project>

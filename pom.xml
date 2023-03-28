@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ch.javacamp.bot-detector</groupId>
     <artifactId>bot-detector</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <url>https://github.com/UeliKurmann/bot-detector</url>
     <inceptionYear>2022</inceptionYear>
     <organization>

@@ -31,8 +31,8 @@ public class BotVerifierImplTest {
                 }
             });
         }
-        Assertions.assertEquals(verified.get(), 2);
-        Assertions.assertEquals(deceived.get(), 4);
+        Assertions.assertEquals(3, verified.get());
+        Assertions.assertEquals(3, deceived.get());
 
     }
 

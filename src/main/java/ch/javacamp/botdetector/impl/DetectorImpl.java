@@ -13,6 +13,13 @@ import java.util.regex.Pattern;
 
 public class DetectorImpl implements Detector {
 
+    /**
+     * Max length of the user-agent string used as cache key.
+     * Longer UAs are truncated for memory efficiency – collisions are acceptable
+     * since bots are typically identified in the first 200 characters.
+     */
+    private static final int MAX_KEY_LENGTH = 200;
+
     private final List<Pattern> botPatterns = new ArrayList<>();
     private final Cache<String, Optional<String>> cache = Cache.create(10_000);
 
@@ -27,7 +34,8 @@ public class DetectorImpl implements Detector {
 
     @Override
     public Assessment detect(RequestDescriptor descriptor) {
-        Optional<String> elem = cache.getOrPut(descriptor.userAgent(), () -> checkUaString(descriptor));
+        String cacheKey = truncate(descriptor.userAgent());
+        Optional<String> elem = cache.getOrPut(cacheKey, () -> checkUaString(descriptor));
         return elem.map(x -> Assessment.create(Assessment.Classification.BOT, x, descriptor))
                 .orElse(Assessment.NO_BOT);
     }
@@ -39,5 +47,9 @@ public class DetectorImpl implements Detector {
             }
         }
         return Optional.empty();
+    }
+
+    private static String truncate(String value) {
+        return value.length() <= MAX_KEY_LENGTH ? value : value.substring(0, MAX_KEY_LENGTH);
     }
 }

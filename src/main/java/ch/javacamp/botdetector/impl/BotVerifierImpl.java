@@ -2,47 +2,40 @@ package ch.javacamp.botdetector.impl;
 
 import ch.javacamp.botdetector.BotDescription;
 import ch.javacamp.botdetector.IdentificationRule;
+import ch.javacamp.botdetector.impl.utils.Cache;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static ch.javacamp.botdetector.BotDescription.Verification.DECEIVED;
 import static ch.javacamp.botdetector.BotDescription.Verification.VERIFIED;
 
 /**
- * Current implementation can only verifiy the following bots:
- * <ul>
- * <li>Google Bot</li>
- * <li>Microsoft Bing Bot</li>
- * <li>Yandex</li>
- * <li>see ch.javacamp.impl.verifiers package.</li>
- * </ul>
+ * Verifies bots using reverse DNS lookups.
+ * Supported bots: see ch.javacamp.botdetector.impl.verifiers package.
  */
 class BotVerifierImpl {
 
-    private final List<IdentificationRule> rules = new ArrayList<>();
-    private final IPResolver resolver = new IPResolver();
-    private final ConcurrentMap<String, BotDescription> cache = new ConcurrentHashMap<>();
+    private final List<IdentificationRule> rules;
+    private final IPResolver resolver;
+    private final Cache<String, BotDescription> cache;
 
     public BotVerifierImpl() {
-        rules.addAll(BotRules.ALL_BOTS);
+        this.rules = BotRules.ALL_BOTS;
+        this.resolver = new IPResolver();
+        this.cache = Cache.create(50_000);
     }
 
     public BotDescription verify(final String ip, final String userAgent) {
-        if (cache.size() > 50000) {
-            cache.clear();
-        }
-        return cache.computeIfAbsent(ip, x -> privateVerification(ip, userAgent.toLowerCase()));
+        final String cacheKey = ip + "|" + userAgent.toLowerCase();
+        return cache.getOrPut(cacheKey, () -> privateVerification(ip, userAgent.toLowerCase()));
     }
 
     private BotDescription privateVerification(final String ip, final String userAgent) {
         for (final IdentificationRule rule : rules) {
             if (rule.matches(userAgent)) {
-                return resolver.getDomainName(ip)//
-                        .filter(d -> this.checkDomains(rule, d))//
-                        .map(d -> BotDescription.create(rule.name(), VERIFIED))//
+                return resolver.getDomainName(ip)
+                        .filter(d -> checkDomains(rule, d))
+                        .map(d -> BotDescription.create(rule.name(), VERIFIED))
                         .orElse(BotDescription.create(rule.name(), DECEIVED));
             }
         }
@@ -57,5 +50,4 @@ class BotVerifierImpl {
         }
         return false;
     }
-
 }

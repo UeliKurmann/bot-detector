@@ -11,9 +11,11 @@ import java.util.Objects;
 public class IdentifierImpl implements Identifier {
 
     private final List<IdentificationRule> identificationRules;
+    private final BotVerifierImpl verifier;
 
     public IdentifierImpl() {
         identificationRules = BotRules.ALL_BOTS;
+        verifier = new BotVerifierImpl();
     }
 
     @Override
@@ -22,13 +24,13 @@ public class IdentifierImpl implements Identifier {
         return identificationRules.stream()//
                 .filter(x -> x.matches(response.descriptor().userAgent())) //
                 .map(x -> BotDescription.create(x.name(), BotDescription.Verification.NOT_VERIFIED))//
-                .findAny() //
+                .findFirst() //
                 .orElse(BotDescription.UNKNOWN);
     }
 
     @Override
     public BotDescription identifyVerified(Assessment response) {
-        return new BotVerifierImpl().verify(response.descriptor().ip(), response.descriptor().userAgent());
+        return verifier.verify(response.descriptor().ip(), response.descriptor().userAgent());
     }
 
 

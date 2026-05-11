@@ -5,8 +5,12 @@ import ch.javacamp.botdetector.impl.utils.Cache;
 import java.net.InetAddress;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class IPResolver {
+
+    private static final Logger LOG = Logger.getLogger(IPResolver.class.getName());
 
     private final Cache<String, Optional<String>> cache;
 
@@ -37,10 +41,9 @@ public class IPResolver {
                 return Optional.of(hostname);
             }
         } catch (final Exception e) {
-            // ignore all exceptions
+            LOG.log(Level.FINE, "DNS resolution failed for IP: " + ip, e);
         }
 
         return Optional.empty();
     }
-
 }

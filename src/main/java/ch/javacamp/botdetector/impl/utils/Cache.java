@@ -1,77 +1,52 @@
 package ch.javacamp.botdetector.impl.utils;
 
-import java.util.Comparator;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
-public class Cache<Key extends Comparable<Key>, Value> {
+/**
+ * A simple thread-safe LRU cache implementation.
+ * Uses a LinkedHashMap with access-order for LRU eviction.
+ * All operations are synchronized since access-order LinkedHashMap
+ * treats get() as a structural modification.
+ */
+public class Cache<Key, Value> {
 
-    private final int cacheSize;
-    private final ConcurrentHashMap<Key, CachedElement> backend = new ConcurrentHashMap<>();
-    private final ExecutorService async = Executors.newSingleThreadExecutor();
+    private final int maxSize;
+    private final LinkedHashMap<Key, ValueHolder<Value>> backend;
 
-    private final AtomicLong access = new AtomicLong();
-    private final AtomicLong create = new AtomicLong();
-
-    private Cache(int maxCacheSize){
-        this.cacheSize = maxCacheSize;
+    private Cache(int maxSize) {
+        this.maxSize = maxSize;
+        this.backend = new LinkedHashMap<Key, ValueHolder<Value>>(maxSize, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Key, ValueHolder<Value>> eldest) {
+                return size() > maxSize;
+            }
+        };
     }
 
-    public static <K extends Comparable<K>, V> Cache<K, V> create(int maxCacheSize){
+    public static <K, V> Cache<K, V> create(int maxCacheSize) {
         return new Cache<>(maxCacheSize);
     }
 
-    public Value getOrPut(Key key, Supplier<Value> supplier){
-        access.incrementAndGet();
-        CachedElement element = backend.computeIfAbsent(key, x -> create(key, supplier.get()));
-        element.tick();
-        evict();
-        return element.value;
-    }
-
-    private void evict(){
-        if(backend.size() > (cacheSize * 0.9)){
-
-            async.submit(() -> {
-                if(backend.size() < (cacheSize * 0.9)){
-                    return;
-                }
-                backend.values().stream()
-                        .sorted(Comparator.comparingLong((CachedElement x) -> x.lastAccessed))
-                        .limit((int)(cacheSize * 0.8))
-                        .forEach(x -> backend.remove(x.key));
-            });
-
+    public synchronized Value getOrPut(Key key, Supplier<Value> supplier) {
+        ValueHolder<Value> holder = backend.get(key);
+        if (holder != null) {
+            return holder.value;
         }
+        Value value = supplier.get();
+        backend.put(key, new ValueHolder<>(value));
+        return value;
     }
 
-    private CachedElement create(Key key, Value value){
-        create.incrementAndGet();
-        return new CachedElement(key, value);
+    public synchronized int size() {
+        return backend.size();
     }
 
-    public double cacheRatio(){
-        return (1-(double)create.get()/(double)access.get())* 100;
-    }
-
-    private class CachedElement {
-        private final Key key;
-        private final Value value;
-        private long lastAccessed;
-
-        private CachedElement(Key key, Value value){
-            this.key = key;
+    private static class ValueHolder<V> {
+        final V value;
+        ValueHolder(V value) {
             this.value = value;
-            this.lastAccessed = System.currentTimeMillis();
-        }
-
-        public void tick(){
-            this.lastAccessed = System.currentTimeMillis();
         }
     }
-
-
 }

@@ -8,6 +8,18 @@ import java.util.List;
 class BotRules {
 
     public static final List<IdentificationRule> ALL_BOTS = List.of(
+            // AI Crawlers (before general bots for specific matching)
+            new OpenAIIdentification(),
+            new ClaudeIdentification(),
+            new PerplexityIdentification(),
+            new BytespiderIdentification(),
+            new CCBotIdentification(),
+            new CohereIdentification(),
+            new MetaAIIdentification(),
+            new DiffbotIdentification(),
+            new ImagesiftIdentification(),
+            new GoogleAIIdentification(),
+            // General search engine bots
             new GoogleIdentification(),
             new BingIdentification(),
             new AppleIdentification(),
